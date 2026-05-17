@@ -1,0 +1,6 @@
+playwright
+google-generativeai
+twilio
+python-dotenv
+pydantic
+PyPDF2

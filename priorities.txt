@@ -1,0 +1,20 @@
+# Job Search Priorities
+# Add your preferred job characteristics here. The AI will read this file and score jobs higher if they match your preferences.
+
+[Technologies]
+- Prefer Python, SQL, Cloud (AWS/GCP/Azure)
+- Open to learning new backend languages (e.g., Go, Node.js)
+
+[Work Model]
+- Maximum of 3 days on-site per week.
+- Highly prefer Hybrid (1-3 days in office) or fully Remote.
+- Reject roles requiring 4 or 5 days on-site.
+
+[Company Type]
+- Interested in startups and mid-sized product companies
+- Avoid highly bureaucratic or legacy enterprise environments if possible
+
+[Role Characteristics]
+- Strongly prioritize Part-time jobs and Student positions over full-time Junior roles.
+- Looking for roles with growth opportunities and mentorship
+- Prefer "Easy Apply" jobs
