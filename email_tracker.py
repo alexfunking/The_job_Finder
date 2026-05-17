@@ -69,6 +69,8 @@ def connect_imap():
         return None
         
     try:
+        import socket
+        socket.setdefaulttimeout(10)
         # Connect to Gmail's IMAP server
         mail = imaplib.IMAP4_SSL("imap.gmail.com")
         mail.login(email_account, email_password)
@@ -84,18 +86,22 @@ def get_text_from_email(msg):
             content_type = part.get_content_type()
             if content_type == "text/plain":
                 try:
-                    text += part.get_payload(decode=True).decode()
-                except:
+                    raw = part.get_payload(decode=True)
+                    charset = part.get_content_charset() or 'utf-8'
+                    text += raw.decode(charset, errors='ignore')
+                except Exception:
                     pass
     else:
         try:
-            text = msg.get_payload(decode=True).decode()
-        except:
+            raw = msg.get_payload(decode=True)
+            charset = msg.get_content_charset() or 'utf-8'
+            text = raw.decode(charset, errors='ignore')
+        except Exception:
             pass
     return text
 
-def check_emails():
-    print("Checking emails for job updates...")
+def _check_emails_inner():
+    """The actual email-check logic — called inside a timeout thread."""
     mail = connect_imap()
     if not mail:
         return
@@ -171,6 +177,16 @@ def check_emails():
             mail.logout()
         except:
             pass
+
+def check_emails():
+    """Runs the email check with a hard 30-second timeout so it never hangs."""
+    import threading
+    print("Checking emails for job updates...")
+    t = threading.Thread(target=_check_emails_inner, daemon=True)
+    t.start()
+    t.join(timeout=30)
+    if t.is_alive():
+        print("Email check timed out after 30s. Skipping.")
 
 if __name__ == "__main__":
     check_emails()

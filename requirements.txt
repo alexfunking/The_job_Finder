@@ -4,3 +4,5 @@ twilio
 python-dotenv
 pydantic
 PyPDF2
+groq
+streamlit

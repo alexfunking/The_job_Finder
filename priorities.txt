@@ -15,6 +15,9 @@
 - Avoid highly bureaucratic or legacy enterprise environments if possible
 
 [Role Characteristics]
-- Strongly prioritize Part-time jobs and Student positions over full-time Junior roles.
+- CRITICAL PRIORITY: I am a student! You MUST strongly prioritize Student positions and Part-time jobs. 
+- Student positions and Part-time roles are my highest preference and should automatically receive a massive boost in the match_score (assigning 80-100 match score).
+- NO PROFESSIONAL EXPERIENCE: I have no prior professional experience in this field yet. Evaluate roles accordingly: look for true entry-level roles, internships, and student positions that require 0 years of experience.
+- Full-time Junior positions are still acceptable but should be scored lower than equivalent student/part-time roles.
 - Looking for roles with growth opportunities and mentorship
 - Prefer "Easy Apply" jobs

@@ -100,10 +100,12 @@ def scrape_jobs(search_queries: list = None):
     """
     if search_queries is None:
         search_queries = [
+            "Student Developer",
+            "Python Student",
+            "Software Engineer Student",
             "Data Engineer Junior", 
             "Junior Software Engineer", 
-            "Junior Python Developer",
-            "Junior Backend Developer"
+            "Junior Python Developer"
         ]
         
     jobs = []

@@ -4,6 +4,7 @@ Main script that ties all modules together.
 """
 import os
 import time
+import json
 import schedule
 from dotenv import load_dotenv
 import scraper
@@ -33,6 +34,9 @@ def frequent_job_hunt_cycle():
     
     if not found_jobs:
         print("No jobs found during scraping.")
+        import datetime
+        with open("last_update.txt", "w") as f:
+            f.write(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         print("--- Frequent cycle completed ---")
         return
 
@@ -48,9 +52,11 @@ def frequent_job_hunt_cycle():
             
         print(f"Evaluating: {job.get('title')}...")
         evaluation = brain.evaluate_job(job)
+        time.sleep(0.5) # Brief pause to respect API throughput limits
         
-        import json
-        if evaluation.get('is_relevant'):
+        # Enforce threshold of 70% match score or is_relevant flag
+        is_relevant = evaluation.get('is_relevant') or int(evaluation.get('match_score', 0)) >= 70
+        if is_relevant:
             print(f"Match found! Score: {evaluation.get('match_score')}")
             # Save to DB
             database.add_job(
@@ -75,6 +81,9 @@ def frequent_job_hunt_cycle():
                 ai_summary=json.dumps(evaluation)
             )
 
+    import datetime
+    with open("last_update.txt", "w") as f:
+        f.write(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     print("--- Frequent cycle completed ---")
 
 def send_daily_summary():
@@ -90,11 +99,11 @@ def send_daily_summary():
 
 def main():
     print("Job Finder is running.")
-    print("Scraping and checking emails every 2 hours.")
+    print("Scraping and checking emails every 1 hour.")
     print("Sending WhatsApp summary daily at 10:00 AM.")
     
-    # Schedule the frequent cycle to run every 2 hours
-    schedule.every(2).hours.do(frequent_job_hunt_cycle)
+    # Schedule the frequent cycle to run every 1 hour
+    schedule.every(1).hours.do(frequent_job_hunt_cycle)
     
     # Schedule the notification to run every day at 10:00 AM
     schedule.every().day.at("10:00").do(send_daily_summary)
