@@ -1,7 +1,10 @@
 import streamlit as st
-import database
+from db import database
 import json
 import ast
+import socket
+import qrcode
+from io import BytesIO
 
 # Set page configuration to wide mode for a premium Kanban view
 st.set_page_config(page_title="The Job Finder Dashboard", layout="wide")
@@ -74,6 +77,47 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+def get_local_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(('10.255.255.255', 1))
+        return s.getsockname()[0]
+    except Exception:
+        return '127.0.0.1'
+    finally:
+        s.close()
+
+# --- Sidebar: Phone Access ---
+import os
+
+with st.sidebar.expander("⋮ Phone Access"):
+    app_url = None
+    if os.path.exists("public_url.txt"):
+        try:
+            with open("public_url.txt", "r") as f:
+                app_url = f.read().strip()
+        except Exception:
+            pass
+
+    if app_url:
+        st.success("🌍 Public Internet Access is **ACTIVE**. You can access this from anywhere (4G/5G).")
+        st.write("Scan this QR code to access the app on your phone:")
+    else:
+        local_ip = get_local_ip()
+        app_url = f"http://{local_ip}:8501"
+        st.info("⏳ Starting secure tunnel...")
+        st.write("Scan this QR code to access the app on your phone:")
+
+    # Generate QR code
+    qr = qrcode.QRCode(version=1, box_size=10, border=4)
+    qr.add_data(app_url)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white")
+
+    buf = BytesIO()
+    img.save(buf, format="PNG")
+    st.image(buf, caption=f"URL: {app_url}", use_container_width=True)
+
 st.title("🎯 Job Finder Kanban Dashboard")
 
 try:
@@ -145,9 +189,9 @@ def get_match_score(job):
         return 0
 
 # --- Define the Kanban Columns ---
-col1, col2, col3 = st.columns(3)
+col1, col2, col3, col4 = st.columns(4)
 
-STAGES = ["To Apply", "In Process", "Declined", "Irrelevant"]
+STAGES = ["To Apply", "Applied", "In Process", "Declined", "Irrelevant"]
 SUB_STAGES = ["HR Screen", "Home Assignment", "Tech Interview", "Manager Interview", "Offer"]
 
 def render_job_card(job, column_obj):
@@ -156,13 +200,15 @@ def render_job_card(job, column_obj):
             try:
                 eval_data = json.loads(job['ai_summary'])
                 summary = eval_data.get('summary', job['ai_summary'])
-                location = eval_data.get('location', 'Not specified')
+                location = job.get('location', 'Not specified')
+                if not location or location == 'Not specified':
+                    location = eval_data.get('location', 'Not specified')
                 key_features = eval_data.get('key_features', '')
                 important_qualifications = eval_data.get('important_qualifications', '')
                 match_score = int(eval_data.get('match_score', 0))
             except (json.JSONDecodeError, TypeError):
                 summary = job['ai_summary']
-                location = 'Not specified'
+                location = job.get('location', 'Not specified')
                 key_features = ''
                 important_qualifications = ''
                 match_score = 0
@@ -172,7 +218,7 @@ def render_job_card(job, column_obj):
             clean_key_features = format_field(key_features)
             
             # Select badge color
-            badge_class = "score-badge-high" if match_score >= 80 else ""
+            badge_class = "score-badge-high" if match_score >= 85 else ""
             
             # Render compact Card HTML (Only Job Name, Company, Match Score)
             st.markdown(f"""
@@ -204,6 +250,12 @@ def render_job_card(job, column_obj):
                 st.write(summary)
                 
                 st.markdown(f"[🔗 Apply / View Original Job Listing]({job['url']})")
+                
+                # One-click Quick Action for "To Apply" jobs
+                if job['stage'] == "To Apply":
+                    if st.button("🚀 Mark as Applied", key=f"btn_apply_{job['id']}"):
+                        database.update_job_stage(job['id'], "Applied")
+                        st.rerun()
             
             # State Management Dropdowns directly below the expander
             stage_key = f"stage_{job['id']}"
@@ -236,6 +288,7 @@ def render_job_card(job, column_obj):
 
 # Fetch and sort jobs in Descending Order of match score
 to_apply_jobs = sorted(database.get_jobs_by_stage("To Apply"), key=get_match_score, reverse=True)
+applied_jobs = sorted(database.get_jobs_by_stage("Applied"), key=get_match_score, reverse=True)
 in_process_jobs = sorted(database.get_jobs_by_stage("In Process"), key=get_match_score, reverse=True)
 declined_jobs = sorted(database.get_jobs_by_stage("Declined"), key=get_match_score, reverse=True)
 
@@ -246,11 +299,16 @@ with col1:
         render_job_card(job, col1)
 
 with col2:
-    st.header(f"⏳ In Process ({len(in_process_jobs)})")
-    for job in in_process_jobs:
+    st.header(f"✅ Applied ({len(applied_jobs)})")
+    for job in applied_jobs:
         render_job_card(job, col2)
 
 with col3:
+    st.header(f"⏳ In Process ({len(in_process_jobs)})")
+    for job in in_process_jobs:
+        render_job_card(job, col3)
+
+with col4:
     st.header(f"❌ Declined ({len(declined_jobs)})")
     for job in declined_jobs:
-        render_job_card(job, col3)
+        render_job_card(job, col4)
