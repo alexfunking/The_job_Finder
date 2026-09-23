@@ -1,17 +1,28 @@
+import sys
 import urllib.request
+import unittest
 from bs4 import BeautifulSoup
 
-req = urllib.request.Request('https://www.jobmaster.co.il/jobs/?q=python', headers={'User-Agent': 'Mozilla/5.0'})
-html = urllib.request.urlopen(req).read().decode('utf-8')
-soup = BeautifulSoup(html, 'html.parser')
+sys.stdout.reconfigure(line_buffering=True, encoding='utf-8')
+sys.stderr.reconfigure(line_buffering=True, encoding='utf-8')
 
-for job in soup.select('.JobItem')[:3]:
-    title = job.select_one('.CardHeader')
-    company = job.select_one('.companyNameLink')
-    if not company:
-        company = job.select_one('.companyName')
-    print("Title:", title.text.strip() if title else "None")
-    print("Company:", company.text.strip() if company else "None")
-    a = job.select_one('a')
-    print("Link:", a['href'] if a else "None")
-    print("---")
+
+class TestJobMasterParser(unittest.TestCase):
+    def test_parse_jobmaster_structure(self):
+        html_sample = """
+        <div class="JobItem">
+            <a class="CardHeader" href="/jobs/123">Python Developer</a>
+            <div class="companyNameLink">Tech Company</div>
+        </div>
+        """
+        soup = BeautifulSoup(html_sample, 'html.parser')
+        job = soup.select_one('.JobItem')
+        self.assertIsNotNone(job)
+        title = job.select_one('.CardHeader')
+        company = job.select_one('.companyNameLink')
+        self.assertEqual(title.text.strip(), "Python Developer")
+        self.assertEqual(company.text.strip(), "Tech Company")
+
+
+if __name__ == "__main__":
+    unittest.main()

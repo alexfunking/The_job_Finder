@@ -15,6 +15,9 @@ from functools import lru_cache
 from datetime import datetime, timedelta
 
 # Optional: Google Gemini for classification
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning, module="google.generativeai")
+
 try:
     import google.generativeai as genai
     GEMINI_AVAILABLE = True

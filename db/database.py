@@ -35,8 +35,12 @@ def _normalize_url(url: str) -> str:
 
 def init_db():
     """Initializes the database schema."""
-    conn = sqlite3.connect(DB_NAME)
+    conn = sqlite3.connect(DB_NAME, timeout=15)
     cursor = conn.cursor()
+    try:
+        cursor.execute("PRAGMA journal_mode=WAL")
+    except Exception as e:
+        logger.warning("Could not enable WAL mode: %s", e)
     
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS jobs (
@@ -72,7 +76,7 @@ def init_db():
 def is_job_processed(url: str, title: str = None, company: str = None) -> bool:
     """Checks if a job is already in the database by normalized URL OR by title+company."""
     norm_url = _normalize_url(url)
-    conn = sqlite3.connect(DB_NAME)
+    conn = sqlite3.connect(DB_NAME, timeout=15)
     cursor = conn.cursor()
     # Primary check: normalized URL match
     cursor.execute("SELECT 1 FROM jobs WHERE url = ?", (norm_url,))
@@ -93,7 +97,7 @@ def is_job_processed(url: str, title: str = None, company: str = None) -> bool:
 
 def add_job(title: str, company: str, url: str, location: str = 'Not specified', ai_summary: str = None, stage: str = 'To Apply'):
     """Adds a new job to the database. Normalizes the URL to avoid tracking-param duplicates."""
-    conn = sqlite3.connect(DB_NAME)
+    conn = sqlite3.connect(DB_NAME, timeout=15)
     cursor = conn.cursor()
     date_found = datetime.now().isoformat()
     norm_url = _normalize_url(url)
@@ -111,7 +115,7 @@ def add_job(title: str, company: str, url: str, location: str = 'Not specified',
 
 def get_jobs_by_stage(stage: str):
     """Fetches all jobs for a given stage."""
-    conn = sqlite3.connect(DB_NAME)
+    conn = sqlite3.connect(DB_NAME, timeout=15)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM jobs WHERE stage = ? ORDER BY date_found DESC", (stage,))
@@ -121,7 +125,7 @@ def get_jobs_by_stage(stage: str):
 
 def update_job_stage(job_id: int, new_stage: str, new_sub_stage: str = None):
     """Updates the stage and sub_stage of a job."""
-    conn = sqlite3.connect(DB_NAME)
+    conn = sqlite3.connect(DB_NAME, timeout=15)
     cursor = conn.cursor()
     cursor.execute("""
         UPDATE jobs 
@@ -137,7 +141,7 @@ def deduplicate_jobs() -> int:
     Returns the number of duplicate rows removed.
     """
     import json as _json
-    conn = sqlite3.connect(DB_NAME)
+    conn = sqlite3.connect(DB_NAME, timeout=15)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
 
@@ -191,7 +195,7 @@ def cleanup_low_scoring_jobs() -> int:
     Returns the number of jobs moved.
     """
     import json as _json
-    conn = sqlite3.connect(DB_NAME)
+    conn = sqlite3.connect(DB_NAME, timeout=15)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     

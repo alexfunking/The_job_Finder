@@ -12,7 +12,7 @@
 - Core Stack: Python, SQL, Git, MySQL, C, C++, C#, Data Structures, OOP.
 - Preferred: Roles mentioning Cloud (AWS/GCP/Azure) or data pipelines.
 - Open to: Learning new backend languages (e.g., Go, Node.js) if it's a junior/student role.
-- Bonus: "Easy Apply" or "One-Click Apply" jobs should receive a slight score boost (+2 to +5) if they pass other criteria.
+- Bonus: "Easy Apply" or "One-Click Apply" jobs should receive a very slight score boost (+2 to +5) if they pass other criteria to favor them a tiny bit, but this is NOT a major factor. The job details, matching role, experience, location, and technologies are the absolute main priority.
 
 [Work Model]
 - REJECT (Score 0): Roles requiring 4 or 5 days on-site per week.

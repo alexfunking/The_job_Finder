@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class Config:
+    GROQ_API_KEY = os.getenv("GROQ_API_KEY")
     GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
     TWILIO_SID = os.getenv("TWILIO_SID")
     TWILIO_TOKEN = os.getenv("TWILIO_TOKEN")
@@ -12,12 +13,14 @@ class Config:
     TARGET_PHONE_NUMBER = os.getenv("TARGET_PHONE_NUMBER")
     EMAIL_ACCOUNT = os.getenv("EMAIL_ACCOUNT")
     EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
-    DB_PATH = os.path.join(os.path.dirname(__file__), "jobs.db")
+    DB_PATH = os.path.join(os.path.dirname(__file__), "..", "jobs.db")
 
     @classmethod
     def validate(cls):
         missing = []
-        for key in ["GEMINI_API_KEY", "TWILIO_SID", "TWILIO_TOKEN", "TWILIO_FROM_PHONE", "TARGET_PHONE_NUMBER", "EMAIL_ACCOUNT", "EMAIL_PASSWORD"]:
+        if not cls.GROQ_API_KEY and not cls.GEMINI_API_KEY:
+            missing.append("GROQ_API_KEY / GEMINI_API_KEY")
+        for key in ["TWILIO_SID", "TWILIO_TOKEN", "TWILIO_FROM_PHONE", "TARGET_PHONE_NUMBER", "EMAIL_ACCOUNT", "EMAIL_PASSWORD"]:
             if not getattr(cls, key):
                 missing.append(key)
         if missing:

@@ -17,7 +17,7 @@ load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
 
 def reevaluate_all_jobs():
     print("Connecting to database...")
-    conn = sqlite3.connect("jobs.db")
+    conn = sqlite3.connect(database.DB_NAME)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     

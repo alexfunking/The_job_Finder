@@ -8,10 +8,12 @@ import main
 sys.stdout.reconfigure(line_buffering=True, encoding='utf-8')
 sys.stderr.reconfigure(line_buffering=True, encoding='utf-8')
 
+import asyncio
+
 print("Starting custom test run...")
 try:
     print("Running job hunt cycle...")
-    main.frequent_job_hunt_cycle()
+    asyncio.run(main.frequent_job_hunt_cycle())
 except Exception as e:
     print(f"Exception caught: {e}")
 print("Test run completed.")

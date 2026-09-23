@@ -4,7 +4,7 @@ An automated, intelligent system that acts as your personal job-hunting assistan
 
 ## 🌟 Comprehensive Feature List
 
-### 1. Automated Job Scraping (`scraper.py`)
+### 1. Automated Job Scraping (`scrapers/engine.py`)
 - **Daily Scans:** Automatically searches specific job platforms (like LinkedIn or Glassdoor) for relevant roles.
 - **De-duplication:** Ensures you never see the same job twice by tracking processed URLs.
 
@@ -55,6 +55,7 @@ Create a `.env` file in the root directory and add the following keys:
 
 ```env
 # AI
+GROQ_API_KEY=your_groq_api_key
 GEMINI_API_KEY=your_gemini_api_key
 
 # WhatsApp Notifications (Twilio)

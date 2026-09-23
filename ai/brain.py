@@ -153,7 +153,7 @@ def evaluate_job(job_details: dict) -> dict:
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": _build_user_prompt(job_details)}
                 ],
-                model="llama-3.3-70b-versatile",
+                model="llama-3.1-8b-instant",
                 response_format={"type": "json_object"}
             )
 
